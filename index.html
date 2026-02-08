@@ -7,10 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* 引入自定義字體 */
+        /* 引入簽名用字體：英椎楷書 */
         @font-face {
             font-family: 'Ackaisyo';
             src: url('英椎楷書ackaisyo.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* 引入標題用字體：辰宇落雁體 */
+        @font-face {
+            font-family: 'ChenYuluoyan';
+            src: url('辰宇落雁體.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -27,16 +35,21 @@
         }
 
         body {
-            /* 預設內文還是維持易讀的襯線體 */
+            /* 預設內文維持易讀的襯線體 */
             font-family: 'Crimson Text', 'Noto Serif TC', serif;
             background-color: #e6d2b5;
             background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H22v18h-2v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20z' fill='%23dcc6a0' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
             color: var(--ink);
         }
 
-        /* 標題類使用英椎楷書 */
+        /* 標題類使用辰宇落雁體 */
         h1, h2, h3, .custom-font {
-            font-family: 'Ackaisyo', 'Noto Serif TC', serif;
+            font-family: 'ChenYuluoyan', 'Noto Serif TC', serif;
+        }
+
+        /* 簽名專用字體 */
+        .signature-font {
+            font-family: 'Ackaisyo', serif;
         }
 
         /* 卷軸/卡片容器 */
@@ -228,6 +241,14 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* 圖片點擊效果 */
+        .bark-img {
+            transition: transform 0.1s;
+        }
+        .bark-img:active {
+            transform: scale(0.9);
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -255,9 +276,9 @@
                 <div class="flex items-center justify-end mt-8 gap-3 opacity-90">
                     <div class="text-[#5d4037] text-sm custom-font flex flex-col items-end">
                         <span class="text-xs opacity-70">鑑定人</span>
-                        <span class="text-lg">狛克</span>
+                        <span class="text-lg signature-font text-2xl">狛克</span>
                     </div>
-                    <img src="小狛克.png" alt="小狛克" class="w-10 h-10 rounded-full border-2 border-[#5d4037] shadow-sm bg-[#e6d2b5] object-cover">
+                    <img src="小狛克.png" alt="小狛克" onclick="playBark()" class="bark-img w-10 h-10 rounded-full border-2 border-[#5d4037] shadow-sm bg-[#e6d2b5] object-cover cursor-pointer hover:opacity-80" title="點我聽叫聲">
                 </div>
             </section>
 
@@ -348,9 +369,9 @@
                     <div class="flex items-center gap-2 opacity-80 scale-90 origin-right">
                         <div class="text-[#5d4037] text-sm custom-font text-right">
                             <span class="block text-xs opacity-70">鑑定人</span>
-                            <span class="block">狛克</span>
+                            <span class="block signature-font text-2xl">狛克</span>
                         </div>
-                        <img src="小狛克.png" alt="小狛克" class="w-8 h-8 rounded-full border border-[#5d4037] bg-[#e6d2b5] object-cover">
+                        <img src="小狛克.png" alt="小狛克" onclick="playBark()" class="bark-img w-8 h-8 rounded-full border border-[#5d4037] bg-[#e6d2b5] object-cover cursor-pointer hover:opacity-80" title="點我聽叫聲">
                     </div>
                 </div>
             </section>
@@ -385,6 +406,16 @@
     </div>
 
     <script>
+        // 音效播放
+        function playBark() {
+            try {
+                const audio = new Audio('bark.mp3');
+                audio.play();
+            } catch (e) {
+                console.log("Audio play failed, maybe user interaction is needed first.");
+            }
+        }
+
         // 定義題庫與 Bingo 版面配置
         const bingoLayout = [
             // Row 1
