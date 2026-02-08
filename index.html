@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>身心狀態公會評估</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 引入自定義字體 */
+        @font-face {
+            font-family: 'Ackaisyo';
+            src: url('英椎楷書ackaisyo.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* 中世紀奇幻風格定義 */
+        :root {
+            --parchment: #f3e5ab;
+            --parchment-light: #fdf6e3;
+            --ink: #2c1810;
+            --wood: #5d4037;
+            --gold: #d4af37;
+            --blood: #8a1c1c;
+            --magic: #1a237e;
+        }
+
+        body {
+            /* 預設內文還是維持易讀的襯線體 */
+            font-family: 'Crimson Text', 'Noto Serif TC', serif;
+            background-color: #e6d2b5;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H22v18h-2v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20z' fill='%23dcc6a0' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+            color: var(--ink);
+        }
+
+        /* 標題類使用英椎楷書 */
+        h1, h2, h3, .custom-font {
+            font-family: 'Ackaisyo', 'Noto Serif TC', serif;
+        }
+
+        /* 卷軸/卡片容器 */
+        .scroll-container {
+            background-color: var(--parchment-light);
+            border: 4px double var(--wood);
+            box-shadow: 0 10px 20px rgba(44, 24, 16, 0.3), inset 0 0 40px rgba(139, 69, 19, 0.1);
+            position: relative;
+        }
+
+        .scroll-container::before {
+            content: '';
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            border: 1px solid var(--gold);
+            pointer-events: none;
+            border-radius: 20px;
+        }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 8px;
+            background-color: #d7ccc8;
+            border-radius: 8px;
+            border: 2px solid var(--wood);
+        }
+
+        .bingo-cell {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4px;
+            font-size: 0.9rem;
+            line-height: 1.2;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #efebe9;
+            border: 1px solid #a1887f;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        
+        .bingo-cell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-color: var(--wood);
+            z-index: 10;
+        }
+
+        /* 風險項目的樣式 - 紅色魔法印記 */
+        .bingo-cell.active {
+            background-color: #ffcdd2;
+            border-color: var(--blood);
+            color: #580808;
+            box-shadow: inset 0 0 15px rgba(183, 28, 28, 0.3);
+        }
+        
+        /* 呼吸燈特效 (保留但微調為魔法光暈感) */
+        @keyframes breathe-glow {
+            0%, 100% { box-shadow: inset 0 0 5px rgba(183, 28, 28, 0.2), 0 0 5px rgba(183, 28, 28, 0.2); border-color: var(--blood); }
+            50% { box-shadow: inset 0 0 15px rgba(183, 28, 28, 0.5), 0 0 10px rgba(183, 28, 28, 0.4); border-color: #b71c1c; }
+        }
+
+        .bingo-cell.active {
+            animation: breathe-glow 3s infinite ease-in-out;
+        }
+        
+        .bingo-cell.active::after {
+            content: '點擊揭示';
+            position: absolute;
+            bottom: 2px;
+            font-size: 0.6rem;
+            opacity: 0.8;
+            font-weight: bold;
+            color: var(--blood);
+        }
+
+        .modal-overlay {
+            background-color: rgba(20, 10, 5, 0.7);
+            backdrop-filter: blur(2px);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+        
+        /* 冒險者按鈕風格 */
+        .btn-rpg {
+            position: relative;
+            border: 2px solid var(--wood);
+            border-radius: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 var(--wood);
+        }
+        
+        .btn-rpg:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 var(--wood);
+        }
+
+        .btn-yes {
+            background-color: #f1f8e9;
+            color: #33691e;
+        }
+        .btn-yes:hover {
+            background-color: #dcedc8;
+        }
+        
+        .btn-no {
+            background-color: #ffebee;
+            color: #b71c1c;
+        }
+        .btn-no:hover {
+            background-color: #ffcdd2;
+        }
+
+        .btn-primary {
+            background-color: var(--wood);
+            color: #fff8e1;
+            border-color: #3e2723;
+            box-shadow: 0 4px 0 #3e2723;
+        }
+        .btn-primary:hover {
+            background-color: #4e342e;
+        }
+        .btn-primary:active {
+            box-shadow: 0 0 0 #3e2723;
+        }
+
+        .btn-text {
+            color: #5d4037;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-underline-offset: 4px;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .btn-text:hover {
+            color: #3e2723;
+        }
+        .btn-text:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+
+        /* 風險等級背景 */
+        .risk-bg-low {
+            background-color: #e8f5e9;
+            border: 2px solid #66bb6a;
+            color: #1b5e20;
+        }
+        .risk-bg-mid {
+            background-color: #fff8e1;
+            border: 2px solid #ffca28;
+            color: #7f5f02;
+        }
+        .risk-bg-high {
+            background-color: #ffebee;
+            border: 2px solid #ef5350;
+            color: #b71c1c;
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 4px solid #d7ccc8;
+            border-top: 4px solid #5d4037; 
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="app" class="w-full max-w-lg scroll-container rounded-3xl overflow-hidden">
+        <!-- Header -->
+        <header id="app-header" class="bg-[#5d4037] p-8 text-[#fff8e1] text-center transition-colors duration-500 border-b-4 border-[#3e2723]">
+            <h1 id="title-text" class="text-3xl font-bold tracking-tight" style="text-shadow: 2px 2px 0px #000;">冒險公會生活習慣鑑定</h1>
+            <p id="subtitle-text" class="mt-2 text-[#d7ccc8] italic custom-font">從你的日常習慣，確認你的冒險狀態</p>
+        </header>
+
+        <main class="p-8 relative z-10">
+            <!-- Start Section -->
+            <section id="start-section" class="space-y-6">
+                <div class="space-y-4 text-[#4e342e] leading-relaxed text-lg">
+                    <p>新來的冒險者呀，歡迎來到公會！</p>
+                    <p>為了確保我們公會的冒險者都能擁有不被詛咒的健康靈魂，我們需要進行一些簡單的評估。</p>
+                    <p>接下來我們會詢問你一點生活習慣的問題，請依照你最近一個月的情況回答。</p>
+                </div>
+                <button onclick="startQuiz()" class="w-full py-4 btn-rpg btn-primary text-xl mt-4 custom-font">
+                    開始檢測
+                </button>
+                
+                <!-- 作者簽名與頭像區域 -->
+                <div class="flex items-center justify-end mt-8 gap-3 opacity-90">
+                    <div class="text-[#5d4037] text-sm custom-font flex flex-col items-end">
+                        <span class="text-xs opacity-70">鑑定人</span>
+                        <span class="text-lg">狛克</span>
+                    </div>
+                    <img src="小狛克.png" alt="小狛克" class="w-10 h-10 rounded-full border-2 border-[#5d4037] shadow-sm bg-[#e6d2b5] object-cover">
+                </div>
+            </section>
+
+            <!-- Quiz Section -->
+            <section id="quiz-section" class="hidden space-y-6">
+                <div class="flex justify-between items-end text-[#5d4037]">
+                    <span class="text-lg font-bold custom-font">鑑定進度 <span id="current-index" class="font-serif">1</span>/16</span>
+                    <div class="w-2/3 bg-[#d7ccc8] h-3 rounded-full overflow-hidden border border-[#8d6e63]">
+                        <div id="progress-bar" class="bg-[#8d6e63] h-full transition-all duration-300" style="width: 6.25%"></div>
+                    </div>
+                </div>
+                
+                <div class="min-h-[140px] flex items-center justify-center bg-[#efebe9] rounded-xl border-2 border-[#d7ccc8] p-4 shadow-inner">
+                    <h2 id="question-text" class="text-2xl font-bold text-[#3e2723] leading-relaxed text-center">翻找卷軸中...</h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <button onclick="recordAnswer(true)" class="btn-rpg btn-yes py-6 text-xl custom-font">是 (Yes)</button>
+                    <button onclick="recordAnswer(false)" class="btn-rpg btn-no py-6 text-xl custom-font">否 (No)</button>
+                </div>
+
+                <div class="flex justify-start pt-2">
+                    <button id="prev-btn" onclick="prevQuestion()" class="btn-text custom-font" disabled>
+                        ↺ 回到上一題
+                    </button>
+                </div>
+            </section>
+
+            <!-- Loading Section -->
+            <section id="loading-section" class="hidden flex flex-col items-center justify-center py-12 space-y-6">
+                <div class="loader"></div>
+                <p class="text-[#5d4037] font-bold text-xl animate-pulse custom-font">正在鑑定...</p>
+            </section>
+
+            <!-- Result Section -->
+            <section id="result-section" class="hidden animate-slide-up space-y-6 text-center">
+                
+                <!-- 揭露解釋區塊 -->
+                <div class="bg-[#fff3e0] p-6 rounded-xl border-2 border-[#ffb74d] text-left space-y-3 shadow-md">
+                    <h3 class="text-xl font-bold text-[#e65100] flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        這其實是一張「憂鬱風險」地圖
+                    </h3>
+                    <p class="text-lg text-[#bf360c] leading-relaxed">
+                        你或許會驚訝，為什麼「喝水」、「吃早餐」會跟心理防禦值有關？<br><br>
+                        這份地圖揭露的是那些<b>看似微不足道、卻能積沙成塔影響大腦神經傳導的生活習慣</b>。許多時候，心靈的防禦值不是被什麼很厲害的怪物所打碎，反而是被這些日常的Debuff慢慢侵蝕掉的。
+                    </p>
+                </div>
+
+                <div class="bg-[#d7ccc8] p-4 rounded-xl border-2 border-[#8d6e63]">
+                    <div id="bingo-board" class="bingo-grid mb-4 custom-font">
+                        <!-- JS generated grid -->
+                    </div>
+                    
+                    <!-- 結果數據 -->
+                    <div class="flex justify-between text-base px-4 py-3 bg-[#efebe9] rounded-lg border border-[#a1887f] mb-4">
+                        <p class="text-[#5d4037] font-bold custom-font">風險標記：<span id="risk-score" class="text-[#b71c1c] text-xl font-serif">0</span></p>
+                        <p class="text-[#5d4037] font-bold custom-font">連線詛咒：<span id="line-score" class="text-[#b71c1c] text-xl font-serif">0</span></p>
+                    </div>
+
+                    <!-- 動態建議區塊：背景色會由 JS 控制 -->
+                    <div id="advice-container" class="text-left space-y-3 p-4 rounded-xl shadow-inner transition-colors duration-500">
+                        <p class="text-base leading-relaxed"><span class="font-bold text-lg border-b border-current inline-block mb-1 custom-font">📜 公會綜合評估：</span><br><span id="score-advice"></span></p>
+                        <p class="text-base leading-relaxed mt-2 pt-2 border-t border-current/20"><span class="font-bold text-lg border-b border-current inline-block mb-1 custom-font">🔗 關於連線：</span><br><span id="bingo-advice"></span></p>
+                    </div>
+                </div>
+
+                <div class="text-[#1a237e] font-bold text-base bg-[#e8eaf6] py-3 rounded-lg border border-[#c5cae9] custom-font">
+                    👆 點擊發光的紅色格子，解讀它對大腦的影響！
+                </div>
+
+                <!-- 憂鬱傾向關懷區塊 -->
+                <div class="mt-6 p-5 bg-white/60 rounded-xl border border-[#d7ccc8] text-left text-sm text-[#5d4037] shadow-sm">
+                    <p class="font-bold text-base mb-2 flex items-center gap-2 custom-font">
+                        💡 給冒險者的悄悄話：
+                    </p>
+                    <p class="leading-relaxed">
+                        如果你覺得這份測驗結果讓你感到不安，或是你已經長期感受到情緒低落、對事物失去興趣，請記得尋求專業的身心科醫師或心理諮商師協助。
+                    </p>
+                    <p class="leading-relaxed mt-2 font-bold text-[#8a1c1c]">
+                        你的存在本身就是一場偉大的冒險，為了走更長遠的路，裝備保養是必要的。
+                    </p>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center">
+                    <button onclick="location.reload()" class="text-[#8d6e63] text-base hover:text-[#5d4037] underline decoration-dotted underline-offset-4 custom-font">重新挑戰</button>
+                    <!-- 作者簽名與頭像區域 (Footer) -->
+                    <div class="flex items-center gap-2 opacity-80 scale-90 origin-right">
+                        <div class="text-[#5d4037] text-sm custom-font text-right">
+                            <span class="block text-xs opacity-70">鑑定人</span>
+                            <span class="block">狛克</span>
+                        </div>
+                        <img src="小狛克.png" alt="小狛克" class="w-8 h-8 rounded-full border border-[#5d4037] bg-[#e6d2b5] object-cover">
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="detail-modal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="scroll-container w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-slide-up transform transition-all relative">
+            <div class="bg-[#efebe9] p-4 border-b-2 border-[#d7ccc8] flex justify-between items-center">
+                <h3 id="modal-title" class="text-2xl font-bold text-[#3e2723]">標題</h3>
+                <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-[#d7ccc8] text-[#5d4037] hover:bg-[#bcaaa4] font-bold text-xl">&times;</button>
+            </div>
+            <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                <div>
+                    <h4 class="flex items-center gap-2 text-lg font-bold text-[#c62828] uppercase tracking-wider mb-2 border-b border-[#c62828] pb-1 custom-font">
+                        ⚠️ 風險機制
+                    </h4>
+                    <p id="modal-impact" class="text-[#4e342e] leading-relaxed text-lg"></p>
+                </div>
+                <div class="bg-[#e3f2fd] p-5 rounded-xl border border-[#90caf9]">
+                    <h4 class="flex items-center gap-2 text-base font-bold text-[#1565c0] uppercase tracking-wider mb-2 custom-font">
+                        📖 賢者的文獻
+                    </h4>
+                    <p id="modal-evidence" class="text-[#0d47a1] text-base italic leading-relaxed font-serif"></p>
+                </div>
+            </div>
+            <div class="p-4 border-t-2 border-[#d7ccc8] bg-[#efebe9]">
+                <button onclick="closeModal()" class="w-full py-3 btn-rpg btn-primary text-lg custom-font">收下這則知識</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 定義題庫與 Bingo 版面配置
+        const bingoLayout = [
+            // Row 1
+            { id: 2, tag: "睡眠不足", q: "你每天的睡眠時間是否大多維持在 6-8 小時）？", isReverse: true, impact: "睡眠不足會削弱前額葉皮質對杏仁核的控制，導致情緒反應過度，是憂鬱症的最強預測指標之一。", evidence: "一項大型 Meta 分析指出，每晚睡眠不足 6 小時的人，患上重度憂鬱症的可能性比一般人高出 2 倍。" },
+            { id: 14, tag: "西式飲食", q: "平常飲食中，你是否較少攝取蔬菜、魚類，而以肉類或澱粉為主？", isReverse: false, impact: "西式飲食缺乏 Omega-3 與益生質，會導致腸道菌叢失衡（腸腦軸），這被認為與情緒障礙有直接關係。", evidence: "根據大型隊列研究，採取西式飲食者的憂鬱風險比地中海飲食者（蔬菜、橄欖油、魚）高出 41%。" },
+            { id: 9, tag: "長途通勤", q: "你每天的通勤時間，花在交通工具上的時間是否超過 90 分鐘？", isReverse: false, impact: "長途通勤會減少睡眠與運動時間，並增加暴露在交通噪音與環境壓力下的頻率。", evidence: "研究發現，通勤超過 45 分鐘的勞工，在生活滿意度上顯著較低，且心理健康風險提升了 15% 到 20%。" },
+            { id: 4, tag: "獨居生活", q: "你自己一個人住，或是很少有與家人與室友交流的機會嗎？", isReverse: false, impact: "獨居常導致社交隔離（Social Isolation），缺乏緩衝壓力的情緒出口，是大腦「寂寞中樞」活躍的主因。", evidence: "《PLOS ONE》研究指出，獨居者相對於非獨居者，使用抗憂鬱劑的機率高出 80% 以上。" },
+
+            // Row 2
+            { id: 7, tag: "常吃速食", q: "你每週吃炸雞、漢堡、披薩等速食的頻率是否超過 3 次？", isReverse: false, impact: "速食含有大量反式脂肪與加工油品，會損傷血腦屏障，影響維持情緒穩定的神經通路。", evidence: "發表於《Public Health Nutrition》的研究顯示，常吃速食者罹患憂鬱症的風險比不吃者高出約 51%。" },
+            { id: 1, tag: "不吃早餐", q: "你是否有每天規律吃早餐的習慣？", isReverse: true, impact: "不吃早餐會導致血糖波動不穩，並干擾皮質醇（壓力荷爾蒙）的自然節律，進而影響情緒調節。", evidence: "《Journal of Affective Disorders》研究顯示，與每天吃早餐的人相比，不吃早餐的人患憂鬱症的風險增加了約 73%。" },
+            { id: 6, tag: "嗜吃甜食", q: "你每天都會喝含糖飲料、手搖飲或吃甜點嗎？", isReverse: false, impact: "過量糖分會引發體內慢性發炎，並導致腦源性神經營養因子（BDNF）下降，這與憂鬱症的生理機制高度相關。", evidence: "根據發表於《BMC Psychiatry》的統合分析論文指出，高糖攝取量與憂鬱風險顯著相關。" },
+            { id: 12, tag: "假日補眠", q: "放假時，你的起床時間是否通常比平日上班上課時間晚 2 小時以上？", isReverse: false, impact: "這稱為「社交時差 (Social Jetlag)」，會導致晝夜節律紊亂，這與內因性憂鬱症有強烈因果鏈結。", evidence: "研究顯示，每增加 1 小時的社交時差，罹患憂鬱或焦慮症狀的風險就會增加約 20% 到 25%。" },
+
+            // Row 3
+            { id: 10, tag: "都市生活", q: "你目前的居住環境是否位於人多車多、較為吵雜的市中心區域？", isReverse: false, impact: "都市環境伴隨著高密度的社會壓力、空氣汙染與微量噪音，這些都會讓壓力應對系統過載。", evidence: "《Nature》發表的研究指出，居住在都市中心的人，大腦處理壓力的區域（如杏仁核）比居住農村的人更容易反應過度，憂鬱風險高出 39%。" },
+            { id: 3, tag: "體重異常", q: "你的 BMI 指數是否在18.5 ~ 24之間？", isReverse: true, impact: "異常的體重狀態常伴隨慢性發炎反應（過胖）或營養素缺乏（過瘦），這些生理因素會直接干擾神經傳導物質。", evidence: "研究發現，肥胖者的憂鬱風險增加 55%；而體重過輕者（尤其是男性）的心理健康問題風險亦顯著提升約 30%。" },
+            { id: 13, tag: "開燈睡覺", q: "睡覺時，你的房間是否仍有小夜燈，或窗外有路燈光線透入？", isReverse: false, impact: "微弱光線也會在睡眠中壓抑褪黑激素，並干擾下視丘的情緒調節功能。", evidence: "《American Journal of Epidemiology》研究發現，睡覺時有光照者，三年後出現嚴重憂鬱症狀的機率增加近 2 倍。" },
+            { id: 11, tag: "飲水不足", q: "你有每天喝夠 1500cc 以上白開水的習慣嗎？", isReverse: true, impact: "大腦 80% 是水分，輕微脫水即會影響大腦血流量與情緒平穩，讓人更容易感到焦躁與低落。", evidence: "《World Journal of Psychiatry》研究指出，每日飲水不足者，焦慮與憂鬱的風險分別增加了 73% 與 79%。" },
+            
+            // Row 4
+            { id: 5, tag: "久坐不動", q: "你每天坐著的時間，是否超過 8 小時？", isReverse: false, impact: "久坐會抑制循環並減少腦衍生神經營養因子 (BDNF) 的產生，這類因子負責大腦神經元修復。", evidence: "一項追蹤研究顯示，每天久坐超過 12 小時的人，其罹患憂鬱症的風險比久坐少於 4 小時的人高出 3 倍。" },
+            { id: 15, tag: "被動社群", q: "滑社群軟體時，你是否通常只瀏覽動態跟按讚，而很少留言或發文？", isReverse: false, impact: "只滑動態而沒有互動，這被稱為被動使用社交軟體，這樣的使用方式會產生「向上社會比較」，進而引發極度的孤獨感與自我價值否定。", evidence: "研究指出，被動使用社群媒體者的憂鬱傾向，比主動參與互動的使用者高出 33%。" },
+            { id: 16, tag: "過度追劇", q: "你是否每天追劇或看短影音超過 3 小時以上，而且老是停不下來？", isReverse: false, impact: "連續追劇會導致「情緒慣性」，結束後的空虛感與久坐、睡眠推遲會形成負面循環。", evidence: "《The Journal of Clinical Sleep Medicine》指出，過度追劇者患有失眠、焦慮與憂鬱的可能性顯著增加 1.4 倍。" },
+            { id: 8, tag: "手機成癮", q: "除了工作需求，你每天滑手機或平板的時間是否超過 4 小時？", isReverse: false, impact: "過度使用手機常伴隨數位壓力和社交比較，並會因過量藍光暴露而壓抑血清素分泌。", evidence: "韓國一項針對 5 萬人的研究指出，手機成癮度高的群體，其重度憂鬱症候群風險比低度使用者高出 2.8 倍。" }
+        ];
+
+        let quizOrder = [];
+        let currentStep = 0;
+        let userRisks = new Array(16).fill(false);
+
+        function startQuiz() {
+            quizOrder = Array.from({length: 16}, (_, i) => i).sort(() => Math.random() - 0.5);
+            currentStep = 0;
+            userRisks = new Array(16).fill(false);
+
+            document.getElementById('start-section').classList.add('hidden');
+            document.getElementById('quiz-section').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const layoutIndex = quizOrder[currentStep];
+            const qData = bingoLayout[layoutIndex];
+            
+            document.getElementById('question-text').innerText = qData.q;
+            document.getElementById('current-index').innerText = currentStep + 1;
+            document.getElementById('progress-bar').style.width = `${((currentStep + 1) / 16) * 100}%`;
+            
+            // 控制上一題按鈕
+            const prevBtn = document.getElementById('prev-btn');
+            if (currentStep > 0) {
+                prevBtn.disabled = false;
+            } else {
+                prevBtn.disabled = true;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderQuestion();
+            }
+        }
+
+        function recordAnswer(userAnswer) {
+            const layoutIndex = quizOrder[currentStep];
+            const qData = bingoLayout[layoutIndex];
+
+            let isRisk = false;
+            if (qData.isReverse) {
+                isRisk = !userAnswer;
+            } else {
+                isRisk = userAnswer;
+            }
+
+            userRisks[layoutIndex] = isRisk;
+
+            if (currentStep < 15) {
+                currentStep++;
+                renderQuestion();
+            } else {
+                startLoading();
+            }
+        }
+
+        function startLoading() {
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('loading-section').classList.remove('hidden');
+            
+            // 模擬 1 秒載入時間
+            setTimeout(() => {
+                document.getElementById('loading-section').classList.add('hidden');
+                showResults();
+            }, 1000);
+        }
+
+        function showResults() {
+            document.getElementById('result-section').classList.remove('hidden');
+            
+            document.getElementById('title-text').innerText = "冒險報告書完成";
+            document.getElementById('subtitle-text').innerText = "點擊羊皮紙上的印記，解讀風險背後的機制";
+
+            renderBingo();
+            calculateBingoAndGiveAdvice();
+        }
+
+        function renderBingo() {
+            const board = document.getElementById('bingo-board');
+            board.innerHTML = '';
+            
+            bingoLayout.forEach((item, index) => {
+                const cell = document.createElement('div');
+                const isRisk = userRisks[index];
+                
+                cell.className = `bingo-cell ${isRisk ? 'active' : ''}`;
+                cell.innerText = item.tag;
+                cell.onclick = () => { openModal(index); };
+                board.appendChild(cell);
+            });
+        }
+
+        function calculateBingoAndGiveAdvice() {
+            let lines = 0;
+            const riskCount = userRisks.filter(r => r).length;
+            const grid = [];
+            
+            for (let i = 0; i < 4; i++) grid.push(userRisks.slice(i * 4, i * 4 + 4));
+
+            for (let i = 0; i < 4; i++) {
+                if (grid[i].every(v => v)) lines++;
+                if ([grid[0][i], grid[1][i], grid[2][i], grid[3][i]].every(v => v)) lines++;
+            }
+            if ([grid[0][0], grid[1][1], grid[2][2], grid[3][3]].every(v => v)) lines++;
+            if ([grid[0][3], grid[1][2], grid[2][1], grid[3][0]].every(v => v)) lines++;
+
+            document.getElementById('risk-score').innerText = riskCount;
+            document.getElementById('line-score').innerText = lines;
+
+            // 綜合評估建議與動態背景
+            const adviceContainer = document.getElementById('advice-container');
+            let scoreAdvice = "";
+            
+            // 移除舊的類別
+            adviceContainer.classList.remove('risk-bg-low', 'risk-bg-mid', 'risk-bg-high');
+
+            if (riskCount <= 4) {
+                adviceContainer.classList.add('risk-bg-low');
+                scoreAdvice = "你的生活狀態相當穩固！就像擁有高等級抗性裝備，大多數習慣都有助於大腦保持清晰與平衡，請繼續保持這種良好的節奏。";
+            } else if (riskCount <= 8) {
+                adviceContainer.classList.add('risk-bg-mid');
+                scoreAdvice = "偵測到你的護盾出現裂痕。雖然目前還能應付，但長期累積的微小損傷可能會讓大腦較難抵禦壓力攻擊，建議挑選 1-2 個最容易修復的項目開始調整。";
+            } else {
+                adviceContainer.classList.add('risk-bg-high');
+                scoreAdvice = "警報！你的狀態處於「高耗能」危險區！你的許多習慣正在持續降低你的心靈防禦力，請務必調整生活習慣，並尋找安全的營火休息與恢復。";
+            }
+            document.getElementById('score-advice').innerText = scoreAdvice;
+
+            let bingoAdvice = "";
+            if (lines === 0) {
+                bingoAdvice = "目前沒有形成連線詛咒，代表你的風險比較分散，尚未形成牢不可破的負面循環網，這是好現象！";
+            } else {
+                bingoAdvice = "連線的出現代表風險習慣已經形成連鎖效應。這些習慣往往會互相強化（例如：熬夜導致不吃早餐），建議你優先嘗試斬斷其中一條連線。";
+            }
+            document.getElementById('bingo-advice').innerText = bingoAdvice;
+        }
+
+        function openModal(idx) {
+            const data = bingoLayout[idx];
+            document.getElementById('modal-title').innerText = data.tag;
+            document.getElementById('modal-impact').innerText = data.impact;
+            document.getElementById('modal-evidence').innerText = data.evidence;
+            document.getElementById('detail-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
