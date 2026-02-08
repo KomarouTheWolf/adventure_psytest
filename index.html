@@ -38,7 +38,7 @@
             /* 預設內文維持易讀的襯線體 */
             font-family: 'Crimson Text', 'Noto Serif TC', serif;
             background-color: #e6d2b5;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H22v18h-2v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20z' fill='%23dcc6a0' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H22v18h-2v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20z' fill='%23dcc6a0' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
             color: var(--ink);
             overflow-x: hidden; /* 防止動畫導致捲軸出現 */
         }
@@ -330,7 +330,7 @@
                 <!-- 字體調小：從 text-lg 改為 text-base -->
                 <div class="space-y-4 text-[#4e342e] leading-relaxed text-base">
                     <p>新來的冒險者呀，歡迎來到公會！</p>
-                    <p>為了確保我們公會的冒險者都能擁有不被詛咒的健康靈魂，我們需要進行一些簡單的評估。</p>
+                    <p>為了確保我們公會的冒險者都能擁有不被詛咒的健康身體，我們需要進行一些簡單的評估。</p>
                     <p>接下來我們會詢問你一點生活習慣的問題，請依照你最近一個月的情況回答。</p>
                 </div>
                 <button onclick="startQuiz()" class="w-full py-4 btn-rpg btn-primary text-xl mt-4 custom-font">
@@ -404,12 +404,13 @@
                 <div class="bg-[#fff3e0] p-6 rounded-xl border-2 border-[#ffb74d] text-left space-y-3 shadow-md">
                     <h3 class="text-xl font-bold text-[#e65100] flex items-center gap-2">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        這其實是一張「憂鬱風險」地圖
+                        這其實是一份「心靈防禦值」鑑定！
                     </h3>
                     <!-- 字體調小：從 text-lg 改為 text-base -->
                     <p class="text-base text-[#bf360c] leading-relaxed">
-                        你或許會驚訝，為什麼「喝水」、「吃早餐」會跟心理防禦值有關？<br><br>
-                        這份地圖揭露的是那些<b>看似微不足道、卻能積沙成塔影響大腦神經傳導的生活習慣</b>。許多時候，心靈的防禦值不是被什麼很厲害的怪物所打碎，反而是被這些日常的Debuff慢慢侵蝕掉的。
+                        為什麼「喝水」、「吃早餐」會跟心理防禦值有關？<br><br>
+                        這份地圖揭露的是那些<b>看似微不足道、卻能積沙成塔影響大腦神經傳導的生活習慣</b>。在鑑定中的所有題目，都跟憂鬱的風險有關！<br>
+                        許多時候心靈破防不是因為被很厲害的怪物所打碎，反而可能是被這些日常的Debuff慢慢侵蝕掉的！
                     </p>
                 </div>
 
@@ -433,19 +434,20 @@
                 </div>
 
                 <div class="text-[#1a237e] font-bold text-base bg-[#e8eaf6] py-3 rounded-lg border border-[#c5cae9] custom-font">
-                    👆 點擊發光的紅色格子，解讀它對大腦的影響！
+                    👆 點擊發光的紅色格子，看看它對大腦的影響！
                 </div>
 
                 <!-- 憂鬱傾向關懷區塊 -->
                 <div class="mt-6 p-5 bg-white/60 rounded-xl border border-[#d7ccc8] text-left text-sm text-[#5d4037] shadow-sm">
                     <p class="font-bold text-base mb-2 flex items-center gap-2 custom-font">
-                        💡 給冒險者的悄悄話：
+                        💡 給冒險者的便條紙：
                     </p>
                     <p class="leading-relaxed">
-                        如果你覺得這份測驗結果讓你感到不安，或是你已經長期感受到情緒低落、對事物失去興趣，請記得尋求專業的身心科醫師或心理諮商師協助。
+                        如果你覺得這份測驗結果讓你感覺有點不安，或者你已經覺得情緒低落、對事物失去興趣很久了，請記得尋求專業的身心科醫師或心理諮商師協助。
+
                     </p>
                     <p class="leading-relaxed mt-2 font-bold text-[#8a1c1c]">
-                        你的存在本身就是一場偉大的冒險，為了走更長遠的路，裝備保養是必要的。
+                        為了走更長遠的路，裝備保養是必要的。身體固然重要，但可別忘記維護心靈這件無形裝備！
                     </p>
                 </div>
 
@@ -613,8 +615,13 @@
                     stamp.classList.remove('stamp-animate'); 
                     stamp.classList.add('hidden'); // 隱藏印章，等待下一次點擊
                     
-                    // 移除滑出類，添加滑入類前
+                    // 移除滑出類
                     card.classList.remove('slide-out');
+                    
+                    // 強制瀏覽器重繪 (Reflow)，確保動畫重置
+                    void card.offsetWidth;
+
+                    // 添加滑入類
                     card.classList.add('slide-in');
 
                     // 監聽滑入動畫結束，清理狀態
@@ -718,10 +725,10 @@
                 scoreAdvice = "你的生活狀態相當穩固！就像擁有高等級抗性裝備，大多數習慣都有助於大腦保持清晰與平衡，請繼續保持這種良好的節奏！";
             } else if (riskCount <= 8) {
                 adviceContainer.classList.add('risk-bg-mid');
-                scoreAdvice = "偵測到你的護盾出現裂痕。雖然目前還能應付，但長期累積的微小損傷可能會讓大腦較難抵禦壓力攻擊，建議挑選 1-2 個最容易修復的項目開始調整。";
+                scoreAdvice = "嘎！偵測到你的護盾出現裂痕。雖然目前還能應付，但長期累積的微小損傷可能會讓大腦較難抵禦壓力攻擊，建議挑選 1-2 個最容易修復的項目開始調整！";
             } else {
                 adviceContainer.classList.add('risk-bg-high');
-                scoreAdvice = "警報警報！你的狀態處於「高耗能」危險區！你的許多習慣正在持續降低你的心靈防禦力，請務必調整生活習慣，並尋找安全的營火休息與恢復。";
+                scoreAdvice = "警報警報！你的狀態處於「高耗能」危險區！你的許多習慣正在持續降低你的心靈防禦力，請務必調整生活習慣，並尋找安全的營火休息與恢復！";
             }
             document.getElementById('score-advice').innerText = scoreAdvice;
 
@@ -729,7 +736,7 @@
             if (lines === 0) {
                 bingoAdvice = "目前沒有形成連線詛咒，代表你的風險比較分散，尚未形成牢不可破的負面循環網，這是好現象！";
             } else {
-                bingoAdvice = "連線的出現代表風險習慣已經形成連鎖效應。這些習慣往往會互相強化（例如：熬夜導致不吃早餐），建議你優先嘗試斬斷其中一條連線。";
+                bingoAdvice = "連線的出現代表風險習慣已經形成連鎖效應。這些習慣往往會互相強化（例如：熬夜導致不吃早餐），建議你優先嘗試斬斷其中一條連線！";
             }
             document.getElementById('bingo-advice').innerText = bingoAdvice;
         }
