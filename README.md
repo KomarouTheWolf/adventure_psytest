@@ -1,1 +1,3 @@
-# adventure_psytest
+生活型態的小測驗  
+Gemini我的神  
+狛克小圖繪師：悠無
