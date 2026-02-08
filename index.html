@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* 引入簽名用字體：英椎楷書 */
+        /* 引入簽名與印章用字體：英椎楷書 */
         @font-face {
             font-family: 'Ackaisyo';
             src: url('英椎楷書ackaisyo.ttf') format('truetype');
@@ -15,10 +15,10 @@
             font-style: normal;
         }
 
-        /* 引入標題用字體：辰宇落雁體 */
+        /* 引入標題用字體：JasonHandwriting */
         @font-face {
-            font-family: 'ChenYuluoyan';
-            src: url('辰宇落雁體.ttf') format('truetype');
+            font-family: 'JasonHandwriting';
+            src: url('JasonHandwriting5.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -38,13 +38,14 @@
             /* 預設內文維持易讀的襯線體 */
             font-family: 'Crimson Text', 'Noto Serif TC', serif;
             background-color: #e6d2b5;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H22v18h-2v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20z' fill='%23dcc6a0' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H22v18h-2v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20v-2H0v-2h20z' fill='%23dcc6a0' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
             color: var(--ink);
+            overflow-x: hidden; /* 防止動畫導致捲軸出現 */
         }
 
-        /* 標題類使用辰宇落雁體 */
+        /* 標題類使用 JasonHandwriting */
         h1, h2, h3, .custom-font {
-            font-family: 'ChenYuluoyan', 'Noto Serif TC', serif;
+            font-family: 'JasonHandwriting', 'Noto Serif TC', serif;
         }
 
         /* 簽名專用字體 */
@@ -114,7 +115,7 @@
             box-shadow: inset 0 0 15px rgba(183, 28, 28, 0.3);
         }
         
-        /* 呼吸燈特效 (保留但微調為魔法光暈感) */
+        /* 呼吸燈特效 */
         @keyframes breathe-glow {
             0%, 100% { box-shadow: inset 0 0 5px rgba(183, 28, 28, 0.2), 0 0 5px rgba(183, 28, 28, 0.2); border-color: var(--blood); }
             50% { box-shadow: inset 0 0 15px rgba(183, 28, 28, 0.5), 0 0 10px rgba(183, 28, 28, 0.4); border-color: #b71c1c; }
@@ -249,6 +250,38 @@
         .bark-img:active {
             transform: scale(0.9);
         }
+
+        /* --- 動畫特效定義 --- */
+        
+        /* 蓋章動畫：快速有力，像肉球壓下去 */
+        @keyframes stamp-effect {
+            0% { transform: scale(3) rotate(-10deg); opacity: 0; }
+            50% { transform: scale(0.9) rotate(-10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(-10deg); opacity: 1; }
+        }
+        .stamp-animate {
+            /* 縮短動畫時間至 0.3 秒，符合「快速」與「肉球彈性」的感覺 */
+            animation: stamp-effect 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 向左送出動畫：位移並淡出 */
+        @keyframes slide-out-left {
+            0% { transform: translateX(0) rotate(0); opacity: 1; }
+            100% { transform: translateX(-120%) rotate(-5deg); opacity: 0; }
+        }
+        .slide-out {
+            animation: slide-out-left 0.5s ease-in forwards;
+        }
+
+        /* 從右進入動畫：位移並淡入 */
+        @keyframes slide-in-right {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        .slide-in {
+            animation: slide-in-right 0.5s ease-out forwards;
+        }
+
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -283,7 +316,7 @@
             </section>
 
             <!-- Quiz Section -->
-            <section id="quiz-section" class="hidden space-y-6">
+            <section id="quiz-section" class="hidden space-y-6 overflow-hidden">
                 <div class="flex justify-between items-end text-[#5d4037]">
                     <span class="text-lg font-bold custom-font">鑑定進度 <span id="current-index" class="font-serif">1</span>/16</span>
                     <div class="w-2/3 bg-[#d7ccc8] h-3 rounded-full overflow-hidden border border-[#8d6e63]">
@@ -291,13 +324,32 @@
                     </div>
                 </div>
                 
-                <div class="min-h-[140px] flex items-center justify-center bg-[#efebe9] rounded-xl border-2 border-[#d7ccc8] p-4 shadow-inner">
-                    <h2 id="question-text" class="text-2xl font-bold text-[#3e2723] leading-relaxed text-center">翻找卷軸中...</h2>
-                </div>
+                <!-- 題目卡片容器，用於執行動畫 -->
+                <div id="question-card" class="relative">
+                    
+                    <!-- 印章元素：肉球SVG -->
+                    <!-- 初始 top/left 會由 JS 動態計算後覆蓋 -->
+                    <div id="decision-stamp" class="absolute hidden w-20 h-20 pointer-events-none z-20 text-[#8a1c1c] opacity-90 origin-center">
+                        <svg viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <!-- 主肉墊 -->
+                            <path d="M50 85 C35 85, 25 70, 30 60 C35 50, 65 50, 70 60 C75 70, 65 85, 50 85 Z" />
+                            <!-- 四個腳趾 -->
+                            <ellipse cx="20" cy="45" rx="10" ry="14" transform="rotate(-20 20 45)" />
+                            <ellipse cx="40" cy="30" rx="10" ry="14" transform="rotate(-10 40 30)" />
+                            <ellipse cx="60" cy="30" rx="10" ry="14" transform="rotate(10 60 30)" />
+                            <ellipse cx="80" cy="45" rx="10" ry="14" transform="rotate(20 80 45)" />
+                        </svg>
+                    </div>
 
-                <div class="grid grid-cols-2 gap-6">
-                    <button onclick="recordAnswer(true)" class="btn-rpg btn-yes py-6 text-xl custom-font">是 (Yes)</button>
-                    <button onclick="recordAnswer(false)" class="btn-rpg btn-no py-6 text-xl custom-font">否 (No)</button>
+                    <div class="min-h-[140px] flex items-center justify-center bg-[#efebe9] rounded-xl border-2 border-[#d7ccc8] p-4 shadow-inner">
+                        <h2 id="question-text" class="text-2xl font-bold text-[#3e2723] leading-relaxed text-center">翻找卷軸中...</h2>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6 mt-6">
+                        <!-- 傳入 event 以便計算座標 -->
+                        <button onclick="handleAnswerClick(true, event)" class="btn-rpg btn-yes py-6 text-xl custom-font relative overflow-hidden">是 (Yes)</button>
+                        <button onclick="handleAnswerClick(false, event)" class="btn-rpg btn-no py-6 text-xl custom-font relative overflow-hidden">否 (No)</button>
+                    </div>
                 </div>
 
                 <div class="flex justify-start pt-2">
@@ -446,14 +498,21 @@
         let quizOrder = [];
         let currentStep = 0;
         let userRisks = new Array(16).fill(false);
+        let isAnimating = false; // 防止重複點擊
 
         function startQuiz() {
             quizOrder = Array.from({length: 16}, (_, i) => i).sort(() => Math.random() - 0.5);
             currentStep = 0;
             userRisks = new Array(16).fill(false);
+            isAnimating = false;
 
             document.getElementById('start-section').classList.add('hidden');
             document.getElementById('quiz-section').classList.remove('hidden');
+            
+            // 確保卡片在初始位置
+            const card = document.getElementById('question-card');
+            card.className = "relative"; 
+            
             renderQuestion();
         }
 
@@ -474,14 +533,70 @@
             }
         }
 
-        function prevQuestion() {
-            if (currentStep > 0) {
-                currentStep--;
-                renderQuestion();
-            }
+        // 修改後的按鈕點擊處理
+        function handleAnswerClick(userAnswer, event) {
+            if (isAnimating) return; // 動畫中禁止操作
+            isAnimating = true;
+
+            const stamp = document.getElementById('decision-stamp');
+            const card = document.getElementById('question-card');
+            
+            // 計算點擊按鈕的中心位置
+            const btn = event.currentTarget;
+            const btnRect = btn.getBoundingClientRect();
+            const cardRect = card.getBoundingClientRect();
+            
+            // 相對於卡片的 top/left
+            const stampTop = btnRect.top - cardRect.top + (btnRect.height / 2);
+            const stampLeft = btnRect.left - cardRect.left + (btnRect.width / 2);
+
+            // 設定印章位置
+            stamp.style.top = `${stampTop}px`;
+            stamp.style.left = `${stampLeft}px`;
+            // 移除 hidden，添加動畫 class
+            stamp.classList.remove('hidden');
+            stamp.classList.add('stamp-animate');
+
+            // 2. 延遲後執行卡片滑出 (0.4秒後)
+            setTimeout(() => {
+                card.classList.add('slide-out');
+            }, 400); 
+
+            // 3. 延遲後更新數據、滑入新題目 (0.4 + 0.5 秒左右)
+            setTimeout(() => {
+                // 記錄答案 (在視覺切換的同時更新邏輯)
+                recordAnswerLogic(userAnswer);
+
+                if (currentStep < 15) {
+                    currentStep++;
+                    
+                    // 準備下一題內容
+                    renderQuestion();
+
+                    // 重置動畫狀態
+                    stamp.classList.remove('stamp-animate'); 
+                    stamp.classList.add('hidden'); // 隱藏印章，等待下一次點擊
+                    
+                    // 移除滑出類，添加滑入類前
+                    card.classList.remove('slide-out');
+                    card.classList.add('slide-in');
+
+                    // 監聽滑入動畫結束，清理狀態
+                    const onSlideInEnd = () => {
+                        card.classList.remove('slide-in');
+                        isAnimating = false;
+                        card.removeEventListener('animationend', onSlideInEnd);
+                    };
+                    card.addEventListener('animationend', onSlideInEnd);
+
+                } else {
+                    startLoading();
+                }
+            }, 900); // 400ms(蓋章等待) + 500ms(滑出)
         }
 
-        function recordAnswer(userAnswer) {
+        // 僅處理數據記錄，不負責 UI 轉場
+        function recordAnswerLogic(userAnswer) {
             const layoutIndex = quizOrder[currentStep];
             const qData = bingoLayout[layoutIndex];
 
@@ -491,14 +606,14 @@
             } else {
                 isRisk = userAnswer;
             }
-
             userRisks[layoutIndex] = isRisk;
+        }
 
-            if (currentStep < 15) {
-                currentStep++;
+        function prevQuestion() {
+            if (currentStep > 0 && !isAnimating) {
+                currentStep--;
+                // 上一題直接渲染，不一定要特效，或者可以做反向特效（這裡簡化處理）
                 renderQuestion();
-            } else {
-                startLoading();
             }
         }
 
